@@ -1,0 +1,127 @@
+---
+title: "Map of Typhi Cases and River Positivity"
+author: "Chris LeBoa"
+date: "2020/02/05"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## GitHub Documents
+
+This is an R Markdown format used for publishing markdown documents to GitHub. When you click the **Knit** button all R code chunks are run and a markdown file (.md) suitable for publishing to GitHub is generated.
+
+## Load Libraries
+
+You can include R code in the document as follows:
+
+```{r cars}
+
+
+library(tidyverse)
+library(sf)
+library(leaflet)
+
+
+```
+
+## Parameters
+
+```{r}
+#Parameters 
+
+myLocation <- c(85.2, 27.6, 85.61, 27.7)
+
+file_location_cases <- here::here("data/cases/all_cases.shp")
+file_location_rivers <- here::here("data/rivers/rivers.shp")
+file_location_water_samples <- here::here("data/water_samples/water_samples.shp")
+
+#install.packages("rnaturalearth")
+#install.packages("rnaturalearthdata")
+
+library("rnaturalearth")
+library("rnaturalearthdata")
+
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+#Read in Data
+```{r}
+cases <- read_sf(file_location_cases)
+rivers <- read_sf(file_location_rivers)
+water_positivity <- read_sf(file_location_water_samples)
+
+
+
+
+```
+#Map Data
+```{r}
+myMap <- 
+  get_map(
+  location = myLocation,
+  #maptype = "satellite",
+  #source = "osm",
+  crop = FALSE
+  )
+#source="stamen",
+#maptype=“watercolor",
+ggmap(myMap) +
+  ggplot() +
+  geom_polygon(data = read_sf aes(x = long, y = lat))
+
+ggmap(myMap) + 
+  geom_sf(data = cases$geometry)
+
+
+country_nepal <- 
+  ne_countries(country = "nepal")
+
+
+cases %>% 
+  ggplot(x = ) +
+  geom_sf()
+
+```
+
+
+#Wondering why get_map isnt working like it should 
+```{r}
+(map <- get_map(c(left = -97.1268, bottom = 31.536245, right = -97.099334, top = 31.559652)))
+ggmap(map)
+
+
+# characters default to google
+(map <- get_map("orlando, florida"))
+ggmap(map)
+
+#Google map ex
+poland <- get_googlemap(c(lon=19.27, lat=52.03),
+                     zoom = 6, 
+                     maptype = "satellite")
+```
+
+# Maps using Leaflet
+
+```{r}
+
+#install.packages("leaflet")
+
+leaflet() %>% 
+  addTiles() %>% 
+  addCircleMarkers(data = cases, color = "red")
+  
+  #adjust size and alpha of the circle markers 
+  #try mapbox static options 
+  
+  #addCircleMarkers(data = water_positivity + proj(longlat)) %>% 
+  addPolygons(
+    data = rivers,
+    color = "blue",
+    weight = 2
+  )
+```
+
