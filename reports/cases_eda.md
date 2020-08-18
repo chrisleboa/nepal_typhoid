@@ -1,7 +1,7 @@
 Nepal Typhoid Case Analysis
 ================
 Chris LeBoa
-2020-04-19
+2020-05-20
 
   - [Load Case Data](#load-case-data)
       - [Data Vis](#data-vis)
@@ -228,10 +228,10 @@ water_type_recode <-
 
 ses_recode <- 
   c(
-    "1", "<15000 Ruppee",
-    "2", "15000-30000",
-    "3", "30000-50000",
-    "4",  ">50000", 
+    "1" = "<15000 Ruppee",
+    "2" = "15000-30000",
+    "3" = "30000-50000",
+    "4" = ">50000", 
     .default = NA_character_
   )
 
@@ -265,10 +265,10 @@ case_cohort %>%
     ##   Gender = Male (%)                             258 (57.2)   481 (53.1)  
     ##   Toilet Sharing with > 1 Family = Yes (%)      98 (51.6)    370 (41.2)  
     ##   Family Monthly Income (%)                                              
-    ##      <15000 Ruppee                              52 (44.1)    280 (41.2)  
-    ##      1                                          11 (9.3)     87 (12.8)   
-    ##      15000-30000                                17 (14.4)    91 (13.4)   
-    ##      2                                          38 (32.2)    222 (32.6)  
+    ##      <15000 Ruppee                              11 (9.3)     87 (12.8)   
+    ##      >50000                                     17 (14.4)    91 (13.4)   
+    ##      15000-30000                                52 (44.1)    280 (41.2)  
+    ##      30000-50000                                38 (32.2)    222 (32.6)  
     ##   Water Source (%)                                                       
     ##      improved well                              21 (11.1)    287 (32.8)  
     ##      piped water                                51 (26.8)    341 (39.0)  
@@ -283,9 +283,9 @@ case_cohort %>%
     ##   Toilet Sharing with > 1 Family = Yes (%)      0.011      
     ##   Family Monthly Income (%)                     0.736      
     ##      <15000 Ruppee                                         
-    ##      1                                                     
+    ##      >50000                                                
     ##      15000-30000                                           
-    ##      2                                                     
+    ##      30000-50000                                           
     ##   Water Source (%)                              <0.001     
     ##      improved well                                         
     ##      piped water                                           

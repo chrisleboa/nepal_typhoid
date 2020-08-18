@@ -156,10 +156,10 @@ water_type_recode <-
 
 ses_recode <- 
   c(
-    "1", "<15000 Ruppee",
-    "2", "15000-30000",
-    "3", "30000-50000",
-    "4",  ">50000", 
+    "1" = "<15000 Ruppee",
+    "2" = "15000-30000",
+    "3" = "30000-50000",
+    "4" = ">50000", 
     .default = NA_character_
   )
 
@@ -169,6 +169,12 @@ cat_vars <- c( "Gender", "Toilet Sharing with > 1 Family", "Family Monthly Incom
 
 
 case_cohort %>% 
+  filter(
+    str_detect(index_id, "Dummy") == FALSE, 
+         !is.na(sex)
+         ) %>%
+  group_by(index_id) %>% 
+  slice(1) %>% 
   mutate(
     `Age` = age_final,
     Gender = recode(sex, !!! sex_recode), 
@@ -188,6 +194,10 @@ case_cohort %>%
 
 
 #mutate(case_type = recode(case_type, !!! vars_cases_recode))
+
+case_cohort %>% 
+  count(index_id) %>% 
+  arrange(desc(n))
 
 ```
 

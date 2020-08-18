@@ -1,0 +1,68 @@
+---
+title: "Nepal Population Estimate"
+author: "Chris LeBoa"
+date: "`r Sys.Date()`"
+output: 
+  github_document:
+    toc: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r message=FALSE, warning=FALSE}
+# Libraries
+library(tidyverse)
+library(raster)
+library(rgdal)
+
+# Parameters
+str_name<-'/Users/ChrisLeBoa/Downloads/npl_ppp_2020.tif' 
+
+#===============================================================================
+
+```
+
+#I followed the lessons on dealing with Rasters in R on Datacamp for this  https://datacarpentry.org/r-raster-vector-geospatial/01-raster-structure/index.html
+
+
+## Section 1
+```{r}
+
+#Look at componants of raster
+GDALinfo(str_name)
+
+
+#Read Raster File 
+imported_raster=raster(str_name)
+
+#Check data 
+#summary(imported_raster)
+
+#Convert raster to dataframe 
+nepal_pop <- as.data.frame(imported_raster, xy = TRUE)
+     #For some reason this induced many NA values
+try2 <- rasterToPoints(imported_raster)
+nepal_pop <- as_tibble(try2)
+ #You must use the base R version of this and not the 
+
+table
+
+ggplot() +
+  geom_raster(data = nepal_pop, aes(x = x, y = y, fill = npl_ppp_2020)) + 
+  coord_sf(xlim = c(85.2, 85.45), ylim = c(27.6, 27.8)) +
+  scale_fill_viridis_c() +
+  labs(title = "River Water Sampling Locations")
+
+
+
+
+```
+
+
+
+### Subsection
+
+## Section 2
+
