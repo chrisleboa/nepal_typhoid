@@ -18,10 +18,10 @@ library(tableone)
 
 
 # Parameters
-file_redcap <-  "/Users/ChrisLeBoa/GitHub/nepal_typhoid/data/cases/redcap/redcap_data_nepal.rds"
-file_cases_gis <- "/Users/ChrisLeBoa/GitHub/nepal_typhoid/data/cases/all_cases.shp"
-ages_plot <- "/Users/ChrisLeBoa/GitHub/nepal_typhoid/reports/cases_ages.png"
-table_one <- "/Users/ChrisLeBoa/GitHub/nepal_typhoid/reports/cases_table_1.csv"
+file_redcap <-  "/Users/ChrisLeBoa/GitHub/typhoid_research/nepal_typhoid/data/cases/redcap/redcap_data_nepal.rds"
+file_cases_gis <- "/Users/ChrisLeBoa/GitHub/typhoid_research/nepal_typhoid/data/cases/all_cases.shp"
+ages_plot <- "/Users/ChrisLeBoa/GitHub/typhoid_research/nepal_typhoid/reports/cases_ages.png"
+table_one <- "/Users/ChrisLeBoa/GitHub/typhoid_research/nepal_typhoid/reports/table_one.csv"
 
 
 
