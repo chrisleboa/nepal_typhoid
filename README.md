@@ -7,6 +7,7 @@ This is the data Analysis Project for the SEAP-SEES Project. This project analyz
 
 #####  Project Overview --------------------------------------------- ################
 
+<<<<<<< HEAD
 Background: Enteric Fever is endemic throughout much of South Asia and is thought to be spread through contaminated food and water. To better understand the transmission pathways of Salmonella Typhi and Paratyphi A in Nepal, we conducted environmental surveillance of both drinking water and surface water in the greater Kathmandu Valley. 
 
 Methodology: We collected 1L drinking water samples between February and October 2019 from a representative sample of households in Kathmandu and peri-urban and rural communities of neighboring Kavrepalanchok district, both areas with high typhoid incidence. Between November 2019 and July 2021, we collected 50 mL monthly river water samples at 19 surveillance sites from five rivers in and around the Kathmandu valley. On each sampling trip team members also collected structured observations of water usage practices and sewage drainage into the rivers. In each sampling visit, a negative control sample of sterile water was carried to the field and processed in the same manner as the river water samples. Samples were processed using differential centrifugation and incubated in Selenite F for 16 hours. DNA extraction was performed prior to incubation and after 16 hours of incubation. Real-time PCR was performed and a decrease in Ct values of >3 between the two time points was interpreted as evidence of bacterial replication. 
@@ -19,6 +20,8 @@ Conclusions: We found household water contamination with typhoidal Salmonella to
 
 The project is being submitted as a manuscript linked :here: The results are also being submitted to the Coalition Against Typhoid meeting 2021
 
+=======
+>>>>>>> d6485d558e19aaefef233ceb588bf45df94cf1fe
 An explanation of how to use this project organization can be found in [Project workflow](https://dcl-workflow.stanford.edu/project-workflow.html).
 
 The scripts stored in this repository have been named recreate the analysis used in this project. 
