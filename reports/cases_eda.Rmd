@@ -23,8 +23,6 @@ file_cases_gis <- "/Users/ChrisLeBoa/GitHub/typhoid_research/nepal_typhoid/data/
 ages_plot <- "/Users/ChrisLeBoa/GitHub/typhoid_research/nepal_typhoid/reports/cases_ages.png"
 table_one <- "/Users/ChrisLeBoa/GitHub/typhoid_research/nepal_typhoid/reports/table_one.csv"
 
-
-
 ```
 
 ## Load Case Data 
@@ -98,6 +96,8 @@ cases %>%
 cases %>% 
   count(hftoiletshare) %>% 
   mutate(proportion =  n / sum(n))
+
+View(cases)
 ```
 # Percentage that uses mostly unimproved water 
 ```{r}

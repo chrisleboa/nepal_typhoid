@@ -88,6 +88,8 @@ nepal_sees_data %>%
     y = "Number of Samples", 
     x = "Week of the year"
   )
+
+
 ```
 
 
@@ -105,11 +107,20 @@ nepal_river_data_formatted <-
     typhi_pos = 
       if_else(
         river_pcr_typhi_1_t16_ct < 35 | river_pcr_typhi_2_t16_ct < 35, "Pos", "Neg"),
+    typhi_pos_t16 = 
+      if_else(
+        river_pcr_typhi_1_t16_ct < 35 | river_pcr_typhi_2_t16_ct < 35, 1, 0),
     paratyphi_pos = 
       if_else(
         river_pcr_paratyphi_1_t16_ct  < 35 | river_pcr_paratyphi_1_t16_ct < 35,
         "Pos",
         "Neg"
+        ),
+    paratyphi_pos_t16 = 
+      if_else(
+        river_pcr_paratyphi_1_t16_ct  < 35 | river_pcr_paratyphi_1_t16_ct < 35,
+        1,
+        0
         ),
     typhi_border = 
       case_when(
@@ -123,9 +134,14 @@ nepal_river_data_formatted <-
   drop_na(typhi_pos)
 
 nepal_river_data_formatted %>% 
+  group_by(sample_id) %>% 
+  count(paratyphi_pos) %>% 
+  filter(paratyphi_pos == "Pos")
+
+nepal_river_data_formatted %>% 
   ggplot() +
   geom_point(
-    aes(x = sample_date, y = sample_id, fill = as_factor(typhi_pos)),
+    aes(x = sample_date, y = sample_id, fill = as_factor(paratyphi_pos)),
     shape = 21, size = 6
     ) +
   scale_x_date(date_breaks = "2 months", date_labels = "%B %Y") +
@@ -175,17 +191,18 @@ nepal_river_data_formatted %>%
   filter(is.na(redcap_repeat_instance) | redcap_repeat_instance == 1) %>% 
   mutate(
     sample_week = floor_date(sample_date, "week"),    
-    redcap_event_name = str_replace_all(str_extract(redcap_event_name, "[^a]+"), "_", " "), 
+    redcap_event_name = str_replace_all(str_extract(redcap_event_name, "[^a]+"), "_", " ")
     ) %>% 
   group_by(redcap_event_name) %>% 
   count(typhi_pos) %>% 
   filter(typhi_pos == "Pos") %>% 
+  mutate(pos_percent = n / 19 *100) %>% 
   ggplot() + 
-  geom_col(aes(redcap_event_name, n)) + 
-  geom_hline(yintercept = 19, color = "blue") +
+  geom_col(aes(redcap_event_name, pos_percent)) + 
+  #geom_hline(yintercept = 19, color = "blue") +
   theme(axis.text.x = element_text(angle = 45, vjust = .8)) + 
   labs(
-    y = "Number of Positive Locations", 
+    y = "Percent Positive Locations", 
     x = "Sampling Trip"
   ) 
   
@@ -246,9 +263,10 @@ nepal_river_data_formatted %>%
   group_by(redcap_event_name) %>% 
   count(paratyphi_pos) %>% 
   filter(paratyphi_pos == "Pos") %>% 
+  mutate(pos_percent = n / 19 *100) %>% 
   ggplot() + 
-  geom_col(aes(redcap_event_name, n)) + 
-  geom_hline(yintercept = 19, color = "blue") +
+  geom_col(aes(redcap_event_name, pos_percent)) + 
+  #geom_hline(yintercept = 19, color = "blue") +
   theme(axis.text.x = element_text(angle = 45, vjust = .8)) + 
   labs(
     y = "Number of Positive Locations", 
@@ -441,15 +459,24 @@ nepal_river_data_formatted %>%
     typhi_total = sum(typhi_pos == "Pos", na.rm = TRUE),
     paratyphi_total = sum(paratyphi_pos == "Pos", na.rm = TRUE)
   ) %>% 
-  write_csv("/Users/ChrisLeBoa/GitHub/typhoid_research/nepal_typhoid/data/rivers/pos.csv")
+  arrange(desc(typhi_total)) %>% 
+  knitr::kable()
+  #write_csv("/Users/ChrisLeBoa/GitHub/typhoid_research/nepal_typhoid/data/rivers/pos.csv")
 ```
 
 #COUNT DNA and Phage 
 ```{r}
+nepal_river_data_formatted %>% 
+  filter(is.na(redcap_repeat_instance) | redcap_repeat_instance == 1) %>% 
+  mutate(
+    typhi_phage_total = sum(river_phage_typhi, na.rm = TRUE),
+    paratyphi_phage_total = sum(river_phage_paratyphi, na.rm = TRUE)
+  )
+
 ##Typhi 
 nepal_river_data_formatted %>%
   filter(is.na(redcap_repeat_instance) | redcap_repeat_instance == 1) %>% 
-    group_by(sample_id) %>% 
+  group_by(sample_id) %>% 
   summarise(
     typhi_total = sum(typhi_pos == "Pos", na.rm = TRUE),
     paratyphi_total = sum(paratyphi_pos == "Pos", na.rm = TRUE), 
@@ -475,15 +502,16 @@ nepal_river_data_formatted %>%
     position = position_dodge(width=0.7),
     width = .7
   ) +
-  geom_hline(aes(yintercept = 13), color = "grey60") +
+  geom_hline(aes(yintercept = 19), color = "black") +
   theme(
     legend.position = "bottom", 
     axis.text.x = element_text(angle = 45, hjust = 1)
   ) +
+  scale_fill_manual(values = c("darkgreen", "purple")) +
   labs(
     title = "Sampling Points Positive for S. Typhi", 
     x = "Sampling Location",
-    y = "Positive results from first 13 trips", 
+    y = "Positive results from first 19 trips", 
     fill = "Type of Contamination"
   )
 
@@ -517,15 +545,16 @@ nepal_river_data_formatted %>%
     position = position_dodge(width=0.7),
     width = .7
   ) +
-  geom_hline(aes(yintercept = 13), color = "grey60") +
+  geom_hline(aes(yintercept = 19), color = "black") +
   theme(
     legend.position = "bottom", 
     axis.text.x = element_text(angle = 45, hjust = 1)
   ) +
+  scale_fill_manual(values = c("darkgreen", "purple")) +
   labs(
     title = "Sampling Points Positive for S. Paratyphi", 
     x = "Sampling Location",
-    y = "Positive results from first 13 trips", 
+    y = "Positive results from first 19 trips", 
     fill = "Type of Contamination"
   )
 ```
@@ -559,25 +588,7 @@ nepal_river_data_formatted %>%
    y = "Coliform Count (colonies per mL)"
   )
 
-nepal_river_data_formatted %>% 
-  filter(
-    is.na(redcap_repeat_instance) | redcap_repeat_instance == 1, 
-    !is.na(river_e_coli_count)
-    ) %>% 
-  mutate(
-    sample_week = floor_date(sample_date, "week"),    
-    redcap_event_name = str_replace_all(str_extract(redcap_event_name, "[^a]+"), "_", " "), 
-    ) %>% 
-  ggplot(aes(redcap_event_name, river_e_coli_count)) +
-  geom_boxplot() + 
-  geom_point(aes(color = sample_id)) + 
-  scale_y_continuous(labels = scales::label_comma()) +
-  theme(axis.text.x = element_text(angle = 45, vjust = .8)) + 
-  labs(
-   title =  "Coliform Contamination over Time", 
-   x = "", 
-   y = "Coliform Count (colonies per mL)"
-  )
+
 
 nepal_river_data_formatted %>% 
   ggplot(aes(redcap_event_name, river_phage_typhi_count, color = redcap_event_name)) +
@@ -658,5 +669,64 @@ nepal_river_data_formatted %>%
   
 
   
+```
+
+```{r}
+nepal_river_data_formatted %>% 
+  filter(
+    is.na(redcap_repeat_instance) | redcap_repeat_instance == 1, 
+    !is.na(river_e_coli_count)
+    ) %>% 
+  mutate(
+    sample_week = floor_date(sample_date, "week"),    
+    redcap_event_name = 
+      str_replace_all(str_extract(redcap_event_name, "[^a]+"), "_", " "), 
+    ) %>% 
+  ungroup() %>% 
+  ggplot(aes(redcap_event_name, river_e_coli_count)) +
+  geom_boxplot() + 
+  geom_point(aes(color = typhi_pos)) + 
+  geom_smooth() +
+  scale_y_continuous(labels = scales::label_comma()) +
+  theme(
+    axis.text.x = element_text(angle = 45, vjust = .8),
+   # legend.position = "bottom"
+    ) + 
+  labs(
+   title =  "Coliform Contamination over Time", 
+   x = "", 
+   y = "Coliform Count (colonies per mL)"
+  )
+
+
+```
+```{r}
+nepal_river_data_formatted %>% 
+  drop_na(typhi_pos_t16) %>% 
+ # group_by(sample_id) %>% 
+  mutate(
+    redcap_repeat_instance = replace_na(redcap_repeat_instance, 0),
+    river_phage_typhi = as.numeric(river_phage_typhi), 
+    river_phage_paratyphi = as.numeric(river_phage_paratyphi)
+  ) %>% 
+  filter(redcap_repeat_instance < 2) %>% 
+  summarise(
+   # paratyphi_total = sum(paratyphi_pos_t16), 
+  #  typhi_total = sum(typhi_pos_t16), 
+    ptandt_dna_positive = (sum(paratyphi_pos_t16 == 1 & typhi_pos_t16 == 1)),
+   # typhi_phage_total = sum(river_phage_typhi), 
+   # paratyphi_phage_total = sum(river_phage_paratyphi), 
+   phageAndDNA_positive_typhi = (sum(river_phage_typhi== 1 & typhi_pos_t16 == 1, na.rm = TRUE)), 
+   phage_pos_AndDNA_neg_typhi = (sum(river_phage_typhi== 1 & typhi_pos_t16 == 0)), 
+   phage_neg_AndDNA_pos_typhi = (sum(river_phage_typhi== 0 & typhi_pos_t16 == 1, na.rm = TRUE)), 
+   phageAndDNA_neg_typhi = (sum(river_phage_typhi== 0 & typhi_pos_t16 == 0)), 
+   phageandDNA_positive_paratyphi = (sum(river_phage_paratyphi== 1 & paratyphi_pos_t16 == 1)),
+   phage_pos_andDNA_neg_paratyphi = (sum(river_phage_paratyphi== 1 & paratyphi_pos_t16 == 0,
+                                         na.rm = TRUE)), 
+   phage_neg_andDNA_pos_paratyphi = (sum(river_phage_paratyphi== 0 & paratyphi_pos_t16 == 1,
+                                         na.rm = TRUE)), 
+   phage_neg_andDNA_neg_paratyphi = (sum(river_phage_paratyphi== 0 & paratyphi_pos_t16 == 0,
+                                         na.rm = TRUE)) 
+  )
 ```
 

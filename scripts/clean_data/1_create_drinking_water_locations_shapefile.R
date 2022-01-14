@@ -43,3 +43,4 @@ drinking_water %>%
 st_write(drinking_water, dsn = "drinking_water.shp", layer = "nc.shp", driver = "ESRI Shapefile")
 ## Writing layer `nc' to data source `nc1.shp' using driver `ESRI Shapefile'
 ## Writing 100 features with 14 fields and geometry type Multi Polygon.
+
