@@ -33,8 +33,8 @@ drinking_water <-
   drop_na(hflat, hflon) %>%
   st_as_sf(coords = c("hflon", "hflat"), crs = 4326)
 
-drinking_water %>% write_csv("/Users/ChrisLeBoa/GitHub/typhoid_research/nepal_typhoid/data/water_samples/drinking_water_samples.csv")
 
+drinking_water %>% write_csv("/Users/ChrisLeBoa/GitHub/typhoid_research/nepal_typhoid/data/water_samples/drinking_water_samples.csv")
 
 drinking_water %>%
   write_sf("/Users/ChrisLeBoa/GitHub/typhoid_research/nepal_typhoid/data/water_samples/drinking_water_samples.geojson")

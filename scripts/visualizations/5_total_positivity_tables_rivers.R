@@ -10,12 +10,17 @@ library(irr)
 library(lubridate)
 # Parameters
 
+#Drinking water positive
+
+
 
 nepal_river_data_formatted %>%
   filter(is.na(redcap_repeat_instance) | redcap_repeat_instance == 1) %>%
   mutate(
     typhi_pos_num = if_else(river_pcr_typhi_1_t16_ct <= 35 | river_pcr_typhi_2_t16_ct <= 35, 1, 0),
     paratyphi_pos_num = if_else(river_pcr_paratyphi_1_t16_ct <= 35 | river_pcr_paratyphi_2_t16_ct <= 35, 1, 0),
+    typhi_t0_pos_num = if_else(river_pcr_typhi_1_t0_ct <= 35 | river_pcr_typhi_2_t0_ct <= 35, 1, 0),
+    paratyphi_t0_pos_num = if_else(river_pcr_paratyphi_1_t0_ct <= 35 | river_pcr_paratyphi_2_t0_ct <= 35, 1, 0),
     typhi_delta_pos_num =
       if_else(
       (river_pcr_typhi_1_t16_ct <= 35 & river_pcr_typhi_1_t0_ct - river_pcr_typhi_1_t16_ct >= 3) |
@@ -30,7 +35,9 @@ nepal_river_data_formatted %>%
     typhi_phage_pos = sum(river_phage_typhi, na.rm = TRUE),
     paratyphi_phage_pos = sum(river_phage_paratyphi, na.rm = TRUE),
     typhi_pos = sum(typhi_pos_num),
+    typhi_t0_pos = sum(typhi_t0_pos_num),
     paratyphi_pos = sum(paratyphi_pos_num, na.rm = TRUE),
+    paratyphi_t0_pos = sum(paratyphi_t0_pos_num, na.rm = TRUE),
     typhi_total = sum(!is.na(typhi_pos_num)),
     pt_total = sum(!is.na(paratyphi_pos_num)),
     typhi_35_pct = typhi_pos / typhi_total * 100,
@@ -74,7 +81,8 @@ nepal_river_data_formatted %>%
     pt_delta_total = sum(!is.na(paratyphi_delta_pos_num )),
     typhi_delta_pct = typhi_pos_delta / typhi_delta_total * 100,
     pt_delta_pct = paratyphi_pos_delta / pt_delta_total *100
-  )
+  ) %>%
+  filter(paratyphi_pos > 9)
 
 nepal_river_data_formatted %>%
   filter(is.na(redcap_repeat_instance) | redcap_repeat_instance == 1) %>%
@@ -90,8 +98,9 @@ nepal_river_data_formatted %>%
         (river_pcr_paratyphi_1_t16_ct <= 35 & river_pcr_paratyphi_1_t0_ct - river_pcr_paratyphi_1_t16_ct >= 3) |
           (river_pcr_paratyphi_2_t16_ct <= 35 & river_pcr_paratyphi_2_t0_ct - river_pcr_paratyphi_2_t16_ct >= 3), 1, 0)
   ) %>%
-  select(river_phage_paratyphi, paratyphi_pos_num) %>%
-  kappa2()
+  select(river_phage_paratyphi, paratyphi_pos_num)
+
+
 
 
 
@@ -119,7 +128,7 @@ nepal_river_data_formatted %>%
   filter(is.na(redcap_repeat_instance) | redcap_repeat_instance == 1) %>%
   left_join(nepal_hydrology_data, by = "sample_id") %>%
  # drop_na(paratyphi_pos) %>%
-  filter(str_detect(sample_id, "COM-3")) %>%
+  filter(str_detect(sample_id, "COM-1|COM-2|COM-3")) %>%
   mutate(
     typhi_pos_num = if_else(river_pcr_typhi_1_t16_ct <= 35 | river_pcr_typhi_2_t16_ct <= 35, 1, 0),
     paratyphi_pos_num = if_else(river_pcr_paratyphi_1_t16_ct <= 35 | river_pcr_paratyphi_2_t16_ct <= 35, 1, 0)
@@ -138,7 +147,7 @@ nepal_river_data_formatted %>%
   filter(is.na(redcap_repeat_instance) | redcap_repeat_instance == 1) %>%
   left_join(nepal_hydrology_data, by = "sample_id") %>%
   #drop_na(paratyphi_pos) %>%
-  filter(str_detect(sample_id, "BAG-1|BIS-1|MAN-1|COM-0|COM-1")) %>%
+  filter(str_detect(sample_id, "BAG-1|BIS-1|MAN-1|COM-0|BAG-2|BIS-2|MAN-2")) %>%
   mutate(
     typhi_pos_num = if_else(river_pcr_typhi_1_t16_ct <= 35 | river_pcr_typhi_2_t16_ct <= 35, 1, 0),
     paratyphi_pos_num = if_else(river_pcr_paratyphi_1_t16_ct <= 35 | river_pcr_paratyphi_2_t16_ct <= 35, 1, 0)
@@ -151,6 +160,45 @@ nepal_river_data_formatted %>%
     typhi_35_pct = typhi_pos / typhi_total * 100,
     pt_35_pct = paratyphi_pos / pt_total *100
   )
+
+## Kathmandu vs Kavre
+nepal_river_data_formatted %>%
+  filter(is.na(redcap_repeat_instance) | redcap_repeat_instance == 1) %>%
+  left_join(nepal_hydrology_data, by = "sample_id") %>%
+  #drop_na(paratyphi_pos) %>%
+  mutate(
+    region = if_else(str_detect(sample_id, "PN-1|PN-2|PN-3") == TRUE, "Kavre", "KTM")
+    )%>%
+  mutate(
+    typhi_pos_num = if_else(river_pcr_typhi_1_t16_ct <= 35 | river_pcr_typhi_2_t16_ct <= 35, 1, 0),
+    paratyphi_pos_num = if_else(river_pcr_paratyphi_1_t16_ct <= 35 | river_pcr_paratyphi_2_t16_ct <= 35, 1, 0)
+  ) %>%
+  group_by(region) %>%
+  summarise(
+    typhi_pos = sum(typhi_pos_num),
+    paratyphi_pos = sum(paratyphi_pos_num, na.rm = TRUE),
+    typhi_total = sum(!is.na(typhi_pos_num)),
+    pt_total = sum(!is.na(paratyphi_pos_num)),
+    typhi_35_pct = typhi_pos / typhi_total * 100,
+    pt_35_pct = paratyphi_pos / pt_total *100
+  )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 # Plottting isoclines of positivity
@@ -232,6 +280,7 @@ change_typhi <-
     ) %>%
   mutate(
     delta_typhi = river_pcr_typhi_1_t0_ct - river_pcr_typhi_1_t16_ct,
+    delta = river_pcr_typhi_1_t0_ct - river_pcr_typhi_1_t16_ct,
     delta_paratyphi = river_pcr_paratyphi_1_t0_ct - river_pcr_paratyphi_2_t16_ct,
     typhi_delta_pos_num =
       if_else(
@@ -244,6 +293,8 @@ change_typhi <-
   )
 
 
+
+
 change_paratyphi <-
   nepal_river_data_formatted %>%
   filter(
@@ -254,6 +305,7 @@ change_paratyphi <-
   mutate(
     delta_typhi = river_pcr_typhi_1_t0_ct - river_pcr_typhi_1_t16_ct,
     delta_paratyphi = river_pcr_paratyphi_1_t0_ct - river_pcr_paratyphi_1_t16_ct,
+    delta = river_pcr_paratyphi_1_t0_ct - river_pcr_paratyphi_1_t16_ct,
     typhi_delta_pos_num =
       if_else(
         (river_pcr_typhi_1_t16_ct <= 35 & river_pcr_typhi_1_t0_ct - river_pcr_typhi_1_t16_ct >= 3) |
@@ -264,17 +316,23 @@ change_paratyphi <-
           (river_pcr_paratyphi_2_t16_ct <= 35 & river_pcr_paratyphi_2_t0_ct - river_pcr_paratyphi_2_t16_ct >= 3), 1, 0)
   )
 
+change_total <-
+  change_typhi %>%select(delta) %>%
+  full_join(change_paratyphi %>% select(delta))
+
 combined_data <-
   data.frame(
     delta_ct = c(
-      change_typhi$delta_typhi,
-      change_paratyphi$delta_paratyphi,
+      #change_typhi$delta_typhi,
+      #change_paratyphi$delta_paratyphi,
+      change_total$delta,
       neg_data2$neg_delta_pos_sum
       ),
     status = c(
-      rep("typhi (n = 68)", dim(change_typhi)[1]),
-      rep("paratyphi (n = 49)", dim(change_paratyphi)[1]),
-      rep("neg_control (n = 13)", dim(neg_data2)[1])
+     # rep("typhi (n = 68)", dim(change_typhi)[1]),
+     # rep("paratyphi (n = 49)", dim(change_paratyphi)[1]),
+      rep("Contaminated Sample (n = 119)", dim(change_total)[1]),
+      rep("Negative Control (n = 13)", dim(neg_data2)[1])
       )
     )
 
@@ -286,10 +344,12 @@ combined_data %>%
   geom_density(aes(x = delta_ct, fill = status), alpha = 0.5) +
   geom_vline(xintercept = 0) +
   scale_fill_manual(values=c('blue', 'green', "red")) +
+  theme(legend.position = "top") +
   labs(
-    title = "River water samples change in CT",
+    title = "Average change in Ct between time 0 and time 16 extractions",
     x = "CT change T0 to T16",
-    y = "Proportion of samples"
+    y = "Proportion of samples",
+    fill = ""
   )
 
 
@@ -329,4 +389,17 @@ nepal_river_data_formatted %>%
 
 view(nepal_river_data_formatted)
 
+## Interactions with River water
+
+nepal_river_data_formatted %>%
+  filter(river_wash_veg == 1, str_detect(typhi_pos,"Pos") == TRUE)
+
+nepal_river_data_formatted %>%
+  filter(river_walk_across == 1, str_detect(typhi_pos,"Pos") == TRUE)
+
+nepal_river_data_formatted %>%
+  filter(river_wash_clothes == 1, str_detect(typhi_pos,"Pos") == TRUE)
+
+nepal_river_data_formatted %>%
+  filter(river_bathing == 1, str_detect(typhi_pos,"Pos") == TRUE)
 

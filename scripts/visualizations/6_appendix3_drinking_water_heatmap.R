@@ -99,7 +99,8 @@ heatplot_date <-
   ) +
   labs(
     alpha = "Typhi DNA",
-    x = "River Water Contamination"
+    x = "River Water Contamination",
+    y = ""
   ) +
   theme(plot.margin = unit(c(-.5,.5,-.5,.5), "cm"))
 
@@ -138,7 +139,7 @@ Histplot <-
   scale_y_continuous(expand= c(0,0), minor_breaks = NULL) +
   scale_x_continuous( breaks=NULL) +
   theme(axis.title.y = element_text(size=8)) +
-  labs(y = "Number of Typhoid Cases",
+  labs(y = "Number of S.Typhi Cases",
        x = ""
   ) +
   theme(plot.margin = unit(c(1,.5,0.1,.5), "cm"))

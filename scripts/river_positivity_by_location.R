@@ -15,6 +15,7 @@ library(lubridate)
 
 output_location <- here::here("data/water_samples/river_location_positivity/positivity_by_location.csv")
 
+
 nepal_river_data_formatted %>%
   filter(is.na(redcap_repeat_instance) | redcap_repeat_instance == 1) %>%
   mutate(
@@ -29,12 +30,16 @@ nepal_river_data_formatted %>%
         (river_pcr_paratyphi_1_t16_ct <= 35 & river_pcr_paratyphi_1_t0_ct - river_pcr_paratyphi_1_t16_ct >= 3) |
           (river_pcr_paratyphi_2_t16_ct <= 35 & river_pcr_paratyphi_2_t0_ct - river_pcr_paratyphi_2_t16_ct >= 3), 1, 0)
   ) %>%
-  group_by(sample_id) %>%
+  #group_by(sample_id) %>%
   summarise(
     typhi_dna_pos = sum(typhi_pos_num, na.rm = TRUE),
     paratyphi_dna_pos = sum(paratyphi_pos_num, na.rm = TRUE),
+    typhi_delta_pos = sum(typhi_delta_pos_num, na.rm = TRUE),
+    paratyphi_delta_pos = sum(paratyphi_delta_pos_num, na.rm = TRUE),
+    n = n(),
     typhi_phage_pos = sum(river_phage_typhi, na.rm = TRUE),
     paratyphi_phage_pos = sum(river_phage_paratyphi, na.rm = TRUE)
-                        ) %>%
-  write_csv(output_location)
+                        )
+
+
 

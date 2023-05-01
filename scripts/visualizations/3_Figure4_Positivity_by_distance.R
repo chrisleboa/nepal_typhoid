@@ -6,7 +6,9 @@
 
 # Author: Chris LeBoa
 # Version: 2021-05-31
-nepal_river_data_formatted$river_phage_paratyphi
+
+drinking_water
+
 
 
 
@@ -181,5 +183,59 @@ nepal_river_data_formatted %>%
     y = "Percent of Samples Contaminated (%)",
     x = "People Living upstream of Sampling Point"
   )
+
+gam_model = gam(typhi_pos_num ~ s(stream_location, k = 3), data = gam_data, family = "binomial")
+
+#run this as a logistic model where data is all in rows or where data is
+# wonder if there is a fixed or random effect for location as a fixed, random effect on that
+# The k fixes the numver of knobs / how deep the polynomial is to avoid overfitting
+
+nepal_river_data_formatted %>%
+  mutate(
+    stream = case_when(
+      stream_location == - 10 ~ "upstream",
+      stream_location == - 5 ~ "city_center",
+      stream_location == - 1 ~ "city_center",
+      stream_location >= 0 ~ "downstream"
+    ),
+    typhi_pos_num = if_else(str_detect(typhi_pos, "Pos") == TRUE, 1, 0),
+    paratyphi_pos_num = if_else(str_detect(paratyphi_pos, "Pos") == TRUE, 1, 0)
+  ) %>%
+  group_by(stream) %>%
+  summarise(
+    num_pos_typhi = sum(typhi_pos_num, na.rm = TRUE),
+    num_pos_para = sum(paratyphi_pos_num, na.rm = TRUE),
+    prop_pos_typhi = num_pos_typhi / n() * 100,
+    prop_pos_paratyphi = num_pos_para / n() * 100
+  )
+
+#Separation of Kathmandu and Kavre
+
+nepal_drinking_water_data %>%
+  filter(country == 2) %>%
+  select(water_date)
+
+
+
+
+
+
+## The final GAM function used for the paper
+visibly::plot_gam(gam_model, main_var = stream_location) +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank()) +
+  xlim(c(0,3500000)) +
+  scale_x_continuous(labels = scales::comma) +
+  scale_y_continuous(labels = scales::label_percent()) +
+  labs(
+    title = "",
+    y = "PCR positive for S.Typhi DNA(%)",
+    x = "Downstream distance from confluence point (km)")
+
+#visibly::plot_gam_check(gam_model)
+#summary(gam_model)
+#predict.gam(gam_model)
+
+
 
 

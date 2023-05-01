@@ -12,6 +12,8 @@
 
 
 #===============================================================================
+install.packages("ggtext")
+library(ggtext)
 
 # Code
 nepal_river_data_formatted %>%
@@ -51,29 +53,32 @@ plot_1  <-
   geom_col(fill = "darkred") +
   geom_errorbar(aes(ymin = col_mean - sd, ymax = col_mean + sd), width = 0.2) +
   scale_y_continuous(labels = scales::label_comma()) +
-  scale_x_continuous(breaks = seq(1:12))+
+  scale_x_discrete(limits = month.abb) +
   scale_color_nejm() +
   theme_bw() +
   labs(
-    title =  "E. Coli Coliform Contamination over Time",
-    x = "Month",
-    y = "E. Coli Coliform Count (per mL)"
-  )
+    title =  "A.",
+    x = "month",
+    y= "*E. Coli* coliform count (per mL)"
+  ) +
+  theme(axis.title.y = ggtext::element_markdown()) #USE GGText to get the italic naming in place
 
 plot_1.7 <-
   nepal_rainfall_month %>%
-  ggplot(aes(month, rain_month, color = station)) +
+  mutate(`weather station` = station) %>%
+  #mutate(month = factor(month.abb[month],levels=month.abb)) %>%
+  ggplot(aes(month, rain_month, color = `weather station`)) +
   geom_point() +
   geom_smooth(se = FALSE) +
   coord_cartesian(xlim = c(1,12), ylim = c(0,600)) +
   theme_bw() +
-  theme(legend.position = "top") +
-  scale_x_continuous(breaks = scales::breaks_width(1)) +
+  theme(legend.position = "bottom") +
+  scale_x_discrete(limits = month.abb)  +
   scale_color_nejm() +
   labs(
-    title = "Rain in the Kathmandu Valley",
-    x = "Month",
-    y = "Monthly rain total (mm)"
+    title = "B.",
+    x = "month",
+    y = "monthly rain total (mm)"
   )
 
 
@@ -98,9 +103,10 @@ plot_2 <-
     legend.position = ""
   ) +
   labs(
-    title =  "DNA positvity by Coliform Cont.",
+    title =  "B.",
     x = "Month",
-    y = "E. Coli Coliform Count (per mL)",
+    y= expression(paste(italic("E. Coli"),"coliform count (per mL)")),
+    fill="Var1",
     color = ""
   )
 
@@ -111,40 +117,60 @@ num_samples <-
   count(month) %>%
   rename(num_samples = n)
 
-plot_3 <-
+plot_3_data <-
   nepal_river_data_formatted %>%
     filter(is.na(redcap_repeat_instance) | redcap_repeat_instance == 1) %>%
     pivot_longer(cols = c(typhi_pos, paratyphi_pos), names_to = "organism", values_to = "dna") %>%
     add_row(tibble_row(sample_month = as.Date("2020-08-01"), dna = "Pos", organism = "typhi_pos")) %>%
     add_row(tibble_row(sample_month = as.Date("2020-08-01"), dna = "Pos", organism = "paratyphi_pos")) %>%
  # add_row(tibble_row(month = "Aug", dna = "Pos", organism = "paratyphi_pos", percent_pos = NA)) %>%
-    mutate(month = month(sample_month, label = TRUE)) %>%
+    mutate(
+      month = month(sample_month, label = TRUE),
+      month_num = month(sample_month, label = FALSE)) %>%
    # mutate(orgamism = recode(organism, `paratyphi_pos` = "S. Paratyphi", `typhi_pos` = "S. Typhi")) %>%
     group_by(month, organism) %>%
    # group_by(redcap_event_name) %>%
     count(dna) %>%
     filter(!is.na(dna)) %>%
     left_join(num_samples, by = "month") %>%
-    mutate(percent_pos = n / num_samples * 100) %>%
+    mutate(
+      percent_pos = n / num_samples * 100
+      ) %>%
     ungroup() %>%
    # drop_na(month) %>%
     #view()
     #add_row(tibble_row(redcap_event_name = "2020 06 ", organism = "paratyphi_pos", percent_pos = 0)) %>%
     #add_row(tibble_row(redcap_event_name = "2020 04 ", organism = "paratyphi_pos", percent_pos = 0)) %>%
-    filter(dna == "Pos") %>%
+    filter(dna == "Pos")
+
+#Show that there is a difference in summer and non summer months
+plot_3_data %>%
+  mutate(summer = if_else(month %in% c("Jun", "Jul", "Aug", "Sep") == TRUE, 1, 0)) %>%
+  group_by(summer, organism) %>%
+  summarise(percent_pos = sum(n, na.rm = TRUE)/sum(num_samples, na.rm = TRUE) *100 )
+
+plot_3_data %>%
+  mutate(summer = if_else(month %in% c("Jun", "Jul", "Aug", "Sep") == TRUE, 1, 0)) %>%
+  group_by(summer, organism) %>%
+  summarise(
+    sum(n, na.rm = TRUE),
+    sum(num_samples, na.rm = TRUE),
+    percent_pos = sum(n, na.rm = TRUE)/sum(num_samples, na.rm = TRUE) *100 )
+
+  plot_3 <-
+    plot_3_data %>%
     ggplot(aes(month, percent_pos, color = organism, group = organism)) +
     geom_point() +
     geom_smooth(se = F) +
-    #geom_hline(yintercept = 19, color = "blue") +
+    geom_vline(xintercept = "Aug", color = "grey40", linetype = "dashed", alpha = .5) +
     theme_bw() +
-    theme(legend.position = "top") +
+    theme(legend.position = "bottom") +
     scale_color_discrete(labels = c("Paratyphi", "Typhi")) +
-    #scale_color_nejm() +
+    scale_color_nejm() +
     labs(
-      title = "DNA Contamination over Time ",
-      y = "Locations Contaminated (%)",
-      x = "Month"
-
+      title = "C.",
+      y = "% of samples PCR positive",
+      x = "month"
     )
 
 # plot_4 <-
@@ -189,7 +215,7 @@ plot_5 <-
     caption = "source: SEAP hospital surveillance"
   )
 
-grid.arrange(plot_1, plot_1.7, plot_3, plot_5, ncol = 2)
+grid.arrange(plot_1, plot_1.7, plot_3, ncol = 1)
 
 
 
