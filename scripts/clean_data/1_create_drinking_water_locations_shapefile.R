@@ -67,7 +67,7 @@ drinking_water_merged <-
   drinking_water %>%
   left_join(nepal_dw_lab_data, by = "sample_id")
 
-view(nepal_dw_lab_data)
+#view(nepal_dw_lab_data)
 
 plot_drinking_water <-
   drinking_water_merged %>%
@@ -84,7 +84,10 @@ joined_drinking_water_pts <-  #add the regions from the nepal map to the drinkin
 drinking_water_merged %>%
   write_csv(here::here("data/water_samples/drinking_water_samples.csv"))
 
-
+water_samples %>%
+  filter(!is.na(water_date)) %>%
+  arrange(-desc(water_date)) %>%
+  select(water_date)
 
 
 #drinking_water %>%

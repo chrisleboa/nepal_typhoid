@@ -1,6 +1,6 @@
 # This file configures all packages you will need to run the Nepal ES data analysis
 
-install.packages("gridExtra")
+#install.packages("gridExtra")
 
 # Libraries
 library(tidyverse)
@@ -27,7 +27,8 @@ sees_nepal_data <- postForm(
   returnFormat='csv'
 )
 #Drinking water lab results
-sees_dw_lab <-"/Users/ChrisLeBoa/GitHub/typhoid_research/nepal_typhoid/data/water_samples/drinking_water_lab_results.csv"
+sees_dw_lab <-"/Users/ChrisLeBoa/GitHub/typhoid_research/nepal_typhoid/data/water_samples/Nepal_PCR_DrinkingWater_Redcap_Upload.csv"
+  #"/Users/ChrisLeBoa/GitHub/typhoid_research/nepal_typhoid/data/water_samples/drinking_water_lab_results.csv"
 #For River Positivity Analysis
 river_nepal_data <- here::here("data-raw/NepalEnvironmentalSu_DATA_2023-04-21_1344.csv")
 

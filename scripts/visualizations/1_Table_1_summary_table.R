@@ -64,6 +64,10 @@ water_samples <-
     typhoid_vax = if_else(receivevacc == 1, "Yes", "No")
   )
 
+water_to_bind <-
+water_samples %>%
+  select(waterid, treat_drink_water)
+
 #view(water_samples)
 
 list_variables <-
@@ -91,6 +95,8 @@ tab_1_result <- print(tableOne, formatOptions = list(big.mark = ","))
 
 write.csv(tab_1_result, "data/table_one.csv")
 
+
+glimpse(water_samples)
 
 
 

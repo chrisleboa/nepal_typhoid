@@ -19,6 +19,6 @@ nepal_rainfall_month <-
     year = as_factor(year)) %>%
   group_by(year, month, station) %>%
   summarise(rain_month = sum(rainfall_sum, na.rm = TRUE))
-nepal_rainfall_month
+
 
 

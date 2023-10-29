@@ -59,7 +59,8 @@ nepal_river_data_formatted %>%
   ) +
   theme(plot.margin = unit(c(-.5,.5,.5,.5), "cm"))
 
-
+nepal_river_data_formatted %>%
+  group_by(sample_id
 
 ## Using Date on x axis
 heatplot_date <-

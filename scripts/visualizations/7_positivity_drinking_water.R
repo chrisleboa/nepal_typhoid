@@ -7,7 +7,7 @@
 library(tidyverse)
 
 # Parameters
-
+joined_drinking_water_pts <- read_csv("/Users/ChrisLeBoa/GitHub/typhoid_research/nepal_typhoid/data/water_samples/drinking_water_compiled.csv")
 #===============================================================================
 
 #Code
@@ -17,6 +17,7 @@ water_pts_analysis <-
   st_drop_geometry() %>%
   mutate(
     region = if_else(HRRP_DNAME == "Lalitpur", "Kathmandu", HRRP_DNAME),
+    region = if_else(is.na(region), "Kavrepalanchok", region),
     source = case_when(
       watercol_origsource == 1 ~ "Municipal",
       watercol_origsource == 2 ~ "Tanker",
@@ -52,10 +53,12 @@ water_pts_analysis %>%
   drop_na(region) %>%
   group_by(region) %>%
   count(source) %>%
-  pivot_wider(names_from = "region", values_from = "n")
+  pivot_wider(names_from = "region", values_from = "n") %>%
+  write_csv(., "drinking_water_locations.csv")
 
+water_pts_analysis %>% count(region)
 
-
+water_pts_analysis %>% filter(is.na(region))
 
 joined_drinking_water_pts <-
 joined_drinking_water_pts %>%
@@ -66,17 +69,30 @@ joined_drinking_water_pts %>%
     pcr_typhi1_dup2_ct = as.numeric(pcr_typhi1_dup2_ct),
     pcr_paratyphi1_dup1_ct = as.numeric(pcr_paratyphi1_dup1_ct),
     pcr_paratyphi1_dup2_ct = as.numeric(pcr_paratyphi1_dup2_ct),
-    pos_typhi = if_else(pcr_typhi1_dup1_ct <40.0 | pcr_typhi2_dup2_ct < 40.0, 1, 0),
-    pos_paratyphi = if_else(pcr_paratyphi1_dup1_ct <40.0 | pcr_paratyphi1_dup2_ct < 40.0, 1, 0)
+    pos_typhi = if_else(pcr_typhi1_dup1_ct <39.0 | pcr_typhi2_dup2_ct < 39.0, 1, 0),
+    pos_paratyphi = if_else(pcr_paratyphi1_dup1_ct <39.0 | pcr_paratyphi1_dup2_ct < 39.0, 1, 0)
          )
 
 joined_drinking_water_pts %>%
   count(pos_typhi, pos_paratyphi)
 
 joined_drinking_water_pts %>%
-  filter(pos_typhi == 1 | pos_paratyphi == 1) %>%
+  filter(pos_paratyphi == 1) %>%
 count(HRRP_DNAME, water_type)
 
+treat_water <-
+  joined_drinking_water_pts %>%
+  left_join(water_to_bind, by = join_by(sample_id == waterid )) %>%
+  #group_by(pos_typhi) %>%
+  count(treat_drink_water)
+
+joined_drinking_water_pts %>%
+  filter(pos_typhi == 1) %>%
+  count(HRRP_DNAME, water_type)
+
+write_csv(joined_drinking_water_pts,"/Users/ChrisLeBoa/GitHub/typhoid_research/nepal_typhoid/data/water_samples/joined_drinking_water_compiled.csv")
+#The results for these analysis are included in this google sheet:
+#  "https://docs.google.com/spreadsheets/d/1qsBohmAJTTrbN6G3JXBk3KHFludcFASMslfjiLXSM5c/edit#gid=0"
 
 
 ############## The following code was to figure out which of the prior dataset samples were positive and is now depreciated#####

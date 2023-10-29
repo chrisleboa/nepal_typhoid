@@ -7,7 +7,6 @@
 # Author: Chris LeBoa
 # Version: 2021-05-31
 
-drinking_water
 
 
 
@@ -50,6 +49,9 @@ gam_data <- nepal_river_data_formatted %>%
   left_join(nepal_hydrology_data, by = "sample_id") %>%
   mutate(typhi_pos_num = if_else(typhi_pos == "Pos", 1, 0))
 
+gam_data %>%
+  select(sample_id, redcap_event_name, stream_location, typhi_pos_num) %>%
+  write_csv(., "supp_figure_data.csv")
 
 gam_model = gam(typhi_pos_num ~ s(stream_location, k = 3), data = gam_data, family = "binomial")
 
@@ -208,6 +210,7 @@ nepal_river_data_formatted %>%
     prop_pos_typhi = num_pos_typhi / n() * 100,
     prop_pos_paratyphi = num_pos_para / n() * 100
   )
+
 
 #Separation of Kathmandu and Kavre
 

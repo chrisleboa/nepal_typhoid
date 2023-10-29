@@ -12,9 +12,11 @@
 
 
 #===============================================================================
-install.packages("ggtext")
+#install.packages("ggtext")
 library(ggtext)
-
+library(tidyverse)
+library(lubridate)
+nepal_river_data_formatted <- read_csv("/Users/ChrisLeBoa/GitHub/typhoid_research/nepal_typhoid/data/rivers/rivers_formatted.csv")
 # Code
 nepal_river_data_formatted %>%
   filter(
@@ -35,13 +37,15 @@ coliform_month <-
     !is.na(river_e_coli_count)
   ) %>%
   mutate(month = month(sample_month, label = TRUE), month_number = month(sample_month, label = FALSE)) %>%
-  #select(month) %>%
   group_by(month_number) %>%
   summarise(col_mean = mean(river_e_coli_count),
             sd = sd(river_e_coli_count)
             # year = "2020-2021"
   ) %>%
   ungroup()
+
+nepal_river_data_formatted %>% count(sample_month) %>% view()
+
 
 combined_rain_coliform <-
   nepal_rainfall_month %>%
@@ -67,6 +71,7 @@ plot_1.7 <-
   nepal_rainfall_month %>%
   mutate(`weather station` = station) %>%
   #mutate(month = factor(month.abb[month],levels=month.abb)) %>%
+  #write_csv(., "figure_2b_data.csv") PLOS wants data used for each figure
   ggplot(aes(month, rain_month, color = `weather station`)) +
   geom_point() +
   geom_smooth(se = FALSE) +
@@ -82,7 +87,7 @@ plot_1.7 <-
   )
 
 
-plot_2 <-
+plot_2_data <-
   nepal_river_data_formatted %>%
   filter(
     is.na(redcap_repeat_instance) | redcap_repeat_instance == 1,
@@ -91,10 +96,18 @@ plot_2 <-
   ungroup() %>%
   pivot_longer(cols = c(typhi_pos, paratyphi_pos), names_to = "organism", values_to = "dna") %>%
   mutate(organism = str_remove(organism, "_pos")) %>%
-  drop_na(dna) %>%
+  drop_na(dna)
+
+plot_2_data %>%
+  select(dna, river_e_coli_count, dna) %>%
+   write_csv(., "figure_2a_data.csv") #Plos wants datasets used for each figure
+
+plot_2 <-
+  plot_2_data %>%
   ggplot(aes(dna, river_e_coli_count, color = dna)) +
   geom_boxplot() +
   #geom_jitter(alpha = .5) +
+  coord_cartesian( ylim = c(0,100)) +
   facet_wrap(vars(organism)) +
   scale_y_continuous(labels = scales::label_comma()) +
   scale_color_nejm() +
@@ -143,26 +156,16 @@ plot_3_data <-
     #add_row(tibble_row(redcap_event_name = "2020 04 ", organism = "paratyphi_pos", percent_pos = 0)) %>%
     filter(dna == "Pos")
 
-#Show that there is a difference in summer and non summer months
-plot_3_data %>%
-  mutate(summer = if_else(month %in% c("Jun", "Jul", "Aug", "Sep") == TRUE, 1, 0)) %>%
-  group_by(summer, organism) %>%
-  summarise(percent_pos = sum(n, na.rm = TRUE)/sum(num_samples, na.rm = TRUE) *100 )
+## Download data used for figure 2C
 
-plot_3_data %>%
-  mutate(summer = if_else(month %in% c("Jun", "Jul", "Aug", "Sep") == TRUE, 1, 0)) %>%
-  group_by(summer, organism) %>%
-  summarise(
-    sum(n, na.rm = TRUE),
-    sum(num_samples, na.rm = TRUE),
-    percent_pos = sum(n, na.rm = TRUE)/sum(num_samples, na.rm = TRUE) *100 )
 
   plot_3 <-
     plot_3_data %>%
-    ggplot(aes(month, percent_pos, color = organism, group = organism)) +
-    geom_point() +
-    geom_smooth(se = F) +
-    geom_vline(xintercept = "Aug", color = "grey40", linetype = "dashed", alpha = .5) +
+    ggplot() +
+    geom_point(aes(month, percent_pos, color = organism, group = organism)) +
+    geom_smooth(data = dplyr::filter(plot_3_data, month > "Aug"), aes(month, percent_pos, color = organism, group = organism), se = F) +
+    geom_smooth(data = dplyr::filter(plot_3_data, month < "Aug"), aes(month, percent_pos, color = organism, group = organism), se = F) +
+    #geom_vline(xintercept = "Aug", color = "grey40", linetype = "dashed", alpha = .5) +
     theme_bw() +
     theme(legend.position = "bottom") +
     scale_color_discrete(labels = c("Paratyphi", "Typhi")) +
@@ -217,5 +220,10 @@ plot_5 <-
 
 grid.arrange(plot_1, plot_1.7, plot_3, ncol = 1)
 
-
+#Write data used for graphs
+write_csv(coliform_month, "figure_2a_data.csv")
+write_csv(nepal_rainfall_month, "figure_2b_data.csv")
+plot_3_data %>%
+  select(month, percent_pos, organism) %>%
+  write_csv(., "figure_2c_data.csv")
 

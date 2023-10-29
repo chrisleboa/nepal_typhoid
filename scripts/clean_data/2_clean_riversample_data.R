@@ -91,7 +91,9 @@
     count(enroll_month, Species)
 
   ##Original data went from 5/23/2016 to 9/1/2021 so limited to only years where all years of data are present
-
+nepal_river_data_formatted %>%
+  group_by(sample_id) %>%
+  count(typhi_pos)
 
   # Weather
 
@@ -100,4 +102,5 @@
     count(river_wash_veg) %>%
     filter(river_wash_veg == 1)
 
-
+  #Save river data formatted file so do not have to read in each time I want to run results
+write_csv(nepal_river_data_formatted, "/Users/ChrisLeBoa/GitHub/typhoid_research/nepal_typhoid/data/rivers/rivers_formatted.csv")
